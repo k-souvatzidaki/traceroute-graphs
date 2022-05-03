@@ -1,8 +1,8 @@
 # temp
 import sys
-sys.path.append('..\pynetutil')
+sys.path.append('..\\traceroute')
 
-from pynetutil.helpers import *
+from traceroute.helpers import *
 import unittest
 from unittest.mock import patch
 

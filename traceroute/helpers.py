@@ -28,6 +28,7 @@ class CompatibilityError(BaseException):
         self.message = f'Raw sockets not compatible with OS {os}.'
         super().__init__(self.message)
 
+
 class ResolutionError(BaseException):
     """
     Exception raised when a hostname cannot be resolved
@@ -40,6 +41,7 @@ class ResolutionError(BaseException):
 
 def is_compatible(os) -> bool:
     """
+    Returns if the system is compatible with raw sockets
     Raise CompatibilityError f the system OS is not compatible with the module
 
     Parameters:
