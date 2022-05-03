@@ -67,7 +67,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 elif icmp_type == ICMP_DESTINATION_UNREACHABLE:
                     step_name = host
                     reached = True
-                step_timeout = int((datetime.datetime.now() - start).seconds / 1000)
+                step_timeout = int((datetime.datetime.now() - start).total_seconds() * 1000)
             except socket.error as e:  # timeout reached
                 step_timeout = int(timeout*1000)
                 sys.stdout.write(f'{ttl}: {step_timeout} ms * \n')
@@ -82,7 +82,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 'timeout': step_timeout
             }
 
-            if step_address is not None:
+            if step_address is not '*':
                 if step_address == step_name:
                     step_address = ''
                 else:
