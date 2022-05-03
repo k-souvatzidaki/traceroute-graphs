@@ -23,13 +23,15 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
         port: application port used for traceroute (default: 33434)
         timeout: seconds before timeout (default: 0.2)
     """
-    # check system compatibility of raw sockets
-    is_compatible(platform.system())
+    # resolve host name to ip address
     host_address = resolve(host)
     sys.stdout.write(f'Traceroute to host {host_address}\n')
+
+    # check system compatibility of raw sockets
+    is_compatible(platform.system())
+
     ttl = 1
     reached = False
-
     try:
         while ttl <= hops+1:
             start = datetime.datetime.now()
@@ -37,7 +39,8 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 # receive icmp responses from hosts
                 receive_icmp = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.getprotobyname('icmp'))
                 receive_icmp.settimeout(timeout)
-                receive_icmp.bind(('',port))
+                receive_icmp.bind(('', port))
+
                 # send udp messages with ttl = step
                 send_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.getprotobyname('udp'))
                 send_udp.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
@@ -51,22 +54,22 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
             try:
                 packet, step_address = receive_icmp.recvfrom(512)
                 icmp_header = packet[20:28]
-                type, _, _, _, _ = struct.unpack(
+                icmp_type, _, _, _, _ = struct.unpack(
                     "bbHHh", icmp_header
                 )
                 step_address = step_address[0]
-                if type == ICMP_TIME_EXCEEDED:
+                if icmp_type == ICMP_TIME_EXCEEDED:
                     try:
                         step_name = socket.gethostbyaddr(step_address)[0]
                     except socket.error:
                         step_name = step_address 
-                elif type == ICMP_DESTINATION_UNREACHABLE:
+                elif icmp_type == ICMP_DESTINATION_UNREACHABLE:
                     step_name = host
                     reached = True
 
-            except socket.error as e: # timeout reached
+            except socket.error as e:  # timeout reached
                 sys.stdout.write(f'{ttl}: {int((datetime.datetime.now() - start).microseconds/1000)} ms * \n')
-                ttl+= 1
+                ttl += 1
 
             send_udp.close()
             receive_icmp.close()
@@ -79,7 +82,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 sys.stdout.write(f'{ttl}: {int((datetime.datetime.now() - start).microseconds/1000)} ms {step_name} {step_address}\n')
             
             # next step
-            ttl+= 1
+            ttl += 1
             if reached:
                 sys.stdout.write('Traceroute complete. \n\n')
                 break
