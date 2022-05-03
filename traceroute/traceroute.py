@@ -31,6 +31,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
 
     ttl = 1
     reached = False
+    all_nodes = []
     try:
         while ttl <= hops+1:
             start = datetime.datetime.now()
@@ -48,8 +49,9 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 sys.stdout.write('Run as root!! \n')
                 exit(-1)
 
-            step_address = None
-            step_name = None
+            step_address = '*'
+            step_name = '*'
+            step_timeout = None
             try:
                 packet, step_address = receive_icmp.recvfrom(512)
                 icmp_header = packet[20:28]
@@ -65,22 +67,30 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
                 elif icmp_type == ICMP_DESTINATION_UNREACHABLE:
                     step_name = host
                     reached = True
-
+                step_timeout = int((datetime.datetime.now() - start).microseconds / 1000)
             except socket.error as e:  # timeout reached
-                sys.stdout.write(f'{ttl}: {int((datetime.datetime.now() - start).microseconds/1000)} ms * \n')
+                step_timeout = timeout*1000
+                sys.stdout.write(f'{ttl}: {step_timeout} ms * \n')
                 ttl += 1
 
             send_udp.close()
             receive_icmp.close()
+            node = {
+                'step': ttl,
+                'name': step_name,
+                'address': step_address,
+                'timeout': step_timeout
+            }
 
             if step_address is not None:
                 if step_address == step_name:
                     step_address = ''
                 else:
                     step_address = f'[{step_address}]'
-                sys.stdout.write(f'{ttl}: {int((datetime.datetime.now() - start).microseconds/1000)} ms {step_name} {step_address}\n')
+                sys.stdout.write(f'{ttl}: {step_timeout} ms {step_name} {step_address}\n')
             
             # next step
+            all_nodes.append(node)
             ttl += 1
             if reached:
                 sys.stdout.write('Traceroute complete. \n\n')
@@ -88,7 +98,8 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
             if ttl == hops + 2:
                 sys.stdout.write(f'Traceroute to host {host} failed. TTL exceeded.')
 
-        # todo: return a list with the path
+        print(all_nodes)
+        return all_nodes
     except OSError:
         sys.stdout.write('Not compatible with OS \n')
         exit(-1)
