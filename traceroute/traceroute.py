@@ -5,12 +5,11 @@ Functions:
     trace(host, hops=30, port=33434, timeout=0.2)
     trace_pathviz(host, hops=30, port=33434, timeout=0.2, export_png = False)
 """
-import socket
 import sys
 import datetime
 import platform
 import struct
-from helpers import *
+from traceroute.helpers import *
 
 
 def trace(host, hops=30, port=33434, timeout=0.2) -> list:
