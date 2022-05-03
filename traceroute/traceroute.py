@@ -111,9 +111,5 @@ def trace_pathviz(host, hops=30, port=33434, timeout=0.2, export_png = False):
     # todo
 
 
-
 if __name__ == '__main__':
-    print('Running tests on traceroute.py')
-    trace('google.com')
-    trace('192.168.2.1')
-    trace('gshsahashj')
+    print('This is a module.')
