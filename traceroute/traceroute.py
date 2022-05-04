@@ -16,7 +16,7 @@ from diagrams.generic.network import Router
 from diagrams.generic.blank import Blank
 
 
-def trace(host, hops=30, port=33434, timeout=0.2) -> list:
+def trace(host, hops=30, port=33434, timeout=2.0) -> list:
     """
     Execute a traceroute to a remote host
     Returns:
@@ -30,7 +30,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
     """
     # resolve host name to ip address
     host_address = resolve(host)
-    sys.stdout.write(f'Traceroute to host {host_address}\n')
+    sys.stdout.write(f'Traceroute to host {host_address} with a maximum of {hops} hops\n')
 
     # check system compatibility of raw sockets
     is_compatible(platform.system())
@@ -101,8 +101,9 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
             if reached:
                 sys.stdout.write('Traceroute complete. \n\n')
                 break
-            if ttl == hops + 2:
+            if ttl >= hops + 2:
                 sys.stdout.write(f'Traceroute to host {host} failed. TTL exceeded.')
+                all_nodes = None
 
         return all_nodes
     except OSError:
@@ -110,7 +111,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
         exit(-1)
 
 
-def trace_pathviz(host, hops=30, port=33434, timeout=0.2):
+def trace_graph(host, hops=30, port=33434, timeout=2.0):
     """
     Execute a traceroute to a remote host 
     And render a visualization graph of the path
@@ -124,19 +125,20 @@ def trace_pathviz(host, hops=30, port=33434, timeout=0.2):
     """
     route = trace(host, hops, port, timeout)
 
-    with Diagram(f'Traceroute to host {host}', direction='LR', graph_attr=graph_attr, edge_attr=edge_attr,
-                 node_attr=node_attr, filename=f'{host}_route') as graph:
-        previous_node = None
-        for node in route:
-            name = node["name"]
-            timeout = node["timeout"]
-            if name == '*':
-                current_node = Blank('*')
-            else:
-                current_node = Router(f'[{name}] {timeout} ms')
-            if previous_node is not None:
-                previous_node >> Edge(color='black', style='dotted') >> current_node
-            previous_node = current_node
+    if route is not None:
+        with Diagram(f'Traceroute to host {host}', direction='LR', graph_attr=graph_attr, edge_attr=edge_attr,
+                     node_attr=node_attr, filename=f'{host}_route', show=False) as graph:
+            previous_node = None
+            for node in route:
+                name = node["name"]
+                timeout = node["timeout"]
+                if name == '*':
+                    current_node = Blank('*')
+                else:
+                    current_node = Router(f'[{name}] {timeout} ms')
+                if previous_node is not None:
+                    previous_node >> Edge(color='black', style='dotted') >> current_node
+                previous_node = current_node
 
 
 if __name__ == '__main__':
