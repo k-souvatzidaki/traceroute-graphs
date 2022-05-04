@@ -11,6 +11,10 @@ import platform
 import struct
 from traceroute.helpers import *
 
+from diagrams import Diagram, Edge
+from diagrams.generic.network import Router
+from diagrams.generic.blank import Blank
+
 
 def trace(host, hops=30, port=33434, timeout=0.2) -> list:
     """
@@ -106,7 +110,7 @@ def trace(host, hops=30, port=33434, timeout=0.2) -> list:
         exit(-1)
 
 
-def trace_pathviz(host, hops=30, port=33434, timeout=0.2, export_png=False):
+def trace_pathviz(host, hops=30, port=33434, timeout=0.2):
     """
     Execute a traceroute to a remote host 
     And render a visualization graph of the path
@@ -119,7 +123,20 @@ def trace_pathviz(host, hops=30, port=33434, timeout=0.2, export_png=False):
         export_png: whether the graph should be exported in a png or not
     """
     route = trace(host, hops, port, timeout)
-    # todo
+
+    with Diagram(f'Traceroute to host {host}', direction='LR', graph_attr=graph_attr, edge_attr=edge_attr,
+                 node_attr=node_attr, filename=f'{host}_route') as graph:
+        previous_node = None
+        for node in route:
+            name = node["name"]
+            timeout = node["timeout"]
+            if name == '*':
+                current_node = Blank('*')
+            else:
+                current_node = Router(f'[{name}] {timeout} ms')
+            if previous_node is not None:
+                previous_node >> Edge(color='black', style='dotted') >> current_node
+            previous_node = current_node
 
 
 if __name__ == '__main__':

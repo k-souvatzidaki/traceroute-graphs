@@ -16,7 +16,23 @@ ICMP_DESTINATION_UNREACHABLE = 3
 ICMP_ECHO_REQUEST = 8
 ICMP_ECHO_REPLY = 0
 # MISC
-__NOT_COMPATIBLE = ["Darwin","Windows"]
+__NOT_COMPATIBLE = ["Darwin", "Windows"]
+
+# GRAPH PROPERTIES
+graph_attr = {
+    "fontsize": "16",
+    "fixedsize": "false",
+}
+
+edge_attr = {
+    "arrowhead": "none",
+    "minlen": "2.6"
+}
+
+node_attr = {
+    "fontsize": "12",
+    "width": "1"
+}
 
 
 class CompatibilityError(BaseException):
