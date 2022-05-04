@@ -127,7 +127,7 @@ def trace_graph(host, hops=30, port=33434, timeout=2.0):
 
     if route is not None:
         with Diagram(f'Traceroute to host {host}', direction='LR', graph_attr=graph_attr, edge_attr=edge_attr,
-                     node_attr=node_attr, filename=f'{host}_route', show=False) as graph:
+                     node_attr=node_attr, filename=f'output/{host}_route', show=False) as graph:
             previous_node = None
             for node in route:
                 name = node["name"]
