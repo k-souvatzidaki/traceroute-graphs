@@ -3,7 +3,7 @@ Implementation of traceroute command with raw sockets
 
 Functions:
     trace(host, hops=30, port=33434, timeout=0.2)
-    trace_pathviz(host, hops=30, port=33434, timeout=0.2, export_png = False)
+    trace_graph(host, hops=30, port=33434, timeout=0.2, export_png = False)
 """
 import sys
 import datetime
@@ -19,20 +19,19 @@ from diagrams.generic.blank import Blank
 def trace(host, hops=30, port=33434, timeout=2.0) -> list:
     """
     Execute a traceroute to a remote host
-    Returns:
-        all_nodes: a list of all nodes in traceroute path
 
-    Parameters:
+    Args:
         host: the host IP address or domain name
         hops: maximum number of hops before timeout (default: 30)
         port: application port used for traceroute (default: 33434)
         timeout: seconds before timeout (default: 0.2)
+
+    Returns: a list of all nodes in traceroute path
     """
     # resolve host name to ip address
     host_address = resolve(host)
     sys.stdout.write(f'Traceroute to host {host_address} with a maximum of {hops} hops\n')
 
-    # check system compatibility of raw sockets
     is_compatible(platform.system())
 
     ttl = 1
@@ -116,12 +115,11 @@ def trace_graph(host, hops=30, port=33434, timeout=2.0):
     Execute a traceroute to a remote host 
     And render a visualization graph of the path
 
-    Parameters:
+    Args:
         host: the host IP address or domain name
         hops: maximum number of hops before timeout (default: 30)
         port: application port used for traceroute (default: 33434)
         timeout: seconds before timeout (default: 0.2)
-        export_png: whether the graph should be exported in a png or not
     """
     route = trace(host, hops, port, timeout)
 

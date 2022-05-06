@@ -1,5 +1,5 @@
 """
-Helper functions for pynetutil
+Helper functions for traceroute
 
 Classes:
     CompatibilityError
@@ -40,7 +40,7 @@ class CompatibilityError(BaseException):
     Exception raised when system is not compatible with the module
     """
 
-    def __init__(self,os):
+    def __init__(self, os):
         self.message = f'Raw sockets not compatible with OS {os}.'
         super().__init__(self.message)
 
@@ -50,18 +50,20 @@ class ResolutionError(BaseException):
     Exception raised when a hostname cannot be resolved
     """
 
-    def __init__(self,hostname):
+    def __init__(self, hostname):
         self.message = f'Unable to resolve host {hostname}'
         super().__init__(self.message)
 
 
 def is_compatible(os) -> bool:
     """
-    Returns if the system is compatible with raw sockets
-    Raise CompatibilityError f the system OS is not compatible with the module
+    Check if the system is compatible with raw sockets
+    Raise CompatibilityError if the system OS is not compatible with the module.
 
-    Parameters:
-        os: os release string
+    Args:
+        os: The underlying operating system distribution
+
+    Returns: True if the system is compatible (Linux)
     """
     if os in __NOT_COMPATIBLE:
         raise CompatibilityError(os)
@@ -70,11 +72,13 @@ def is_compatible(os) -> bool:
 
 def resolve(hostname) -> str:
     """
-    Returns the ip address of host 
+    Resolve the ip address of host
     Raise ResolutionError if the hostname cannot be resolved
 
-    Parameters:
+    Args:
         hostname: the DNS name or IP address of host
+
+    Returns: The host IP address in string format
     """
     try:
         host_address = socket.gethostbyname(hostname)
